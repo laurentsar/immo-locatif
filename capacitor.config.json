@@ -1,0 +1,6 @@
+{
+  "appId": "com.laurent.immolocatif",
+  "appName": "Immo Locatif",
+  "webDir": "www",
+  "android": { "allowMixedContent": true }
+}

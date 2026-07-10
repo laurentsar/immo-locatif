@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d121e" />
+  <title>Immo Locatif</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-logo">🏠</span>
+      <div>
+        <h1>Immo Locatif <span id="verChip" class="ver-chip"></span></h1>
+        <p class="sub">Reco investissement locatif · Toulouse · Espagne · Marrakech</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="marches">📊 Marchés</button>
+    <button class="tab" data-tab="simu">🧮 Simulateur</button>
+    <button class="tab" data-tab="news">📰 Actus</button>
+    <button class="tab" data-tab="info">ℹ️ Infos</button>
+  </nav>
+
+  <!-- ============================ MARCHÉS ============================ -->
+  <section id="tab-marches" class="tab-panel active">
+    <div class="market-tabs" id="marketTabs"></div>
+    <p id="marketNote" class="note"></p>
+    <div class="toolbar">
+      <label class="sort">Trier :
+        <select id="sortQ">
+          <option value="score">Note d'opportunité</option>
+          <option value="rendement">Rendement brut</option>
+          <option value="prix">Prix (croissant)</option>
+        </select>
+      </label>
+      <button id="dvfBtn" class="ghost" hidden>🏛️ Prix réels DVF</button>
+    </div>
+    <div id="quartierList" class="cards"></div>
+  </section>
+
+  <!-- ============================ SIMULATEUR ============================ -->
+  <section id="tab-simu" class="tab-panel">
+    <div class="form-card">
+      <h2>🧮 Simulateur de rendement locatif</h2>
+      <div class="grid2">
+        <label>Marché / fiscalité
+          <select id="simFisc"></select>
+        </label>
+        <label>Prix du bien (€)
+          <input id="simPrix" type="number" inputmode="numeric" value="200000" />
+        </label>
+        <label>Surface (m²)
+          <input id="simSurf" type="number" inputmode="numeric" value="45" />
+        </label>
+        <label>Loyer mensuel (€)
+          <input id="simLoyer" type="number" inputmode="numeric" value="750" />
+        </label>
+        <label>Frais d'achat (%)
+          <input id="simFrais" type="number" inputmode="decimal" value="8" />
+        </label>
+        <label>Travaux (€)
+          <input id="simTravaux" type="number" inputmode="numeric" value="0" />
+        </label>
+        <label>Apport (€)
+          <input id="simApport" type="number" inputmode="numeric" value="20000" />
+        </label>
+        <label>Taux crédit (%)
+          <input id="simTaux" type="number" inputmode="decimal" value="3.6" />
+        </label>
+        <label>Durée crédit (ans)
+          <input id="simDuree" type="number" inputmode="numeric" value="20" />
+        </label>
+        <label>Charges/vacance (%)
+          <input id="simCharges" type="number" inputmode="numeric" value="22" />
+        </label>
+      </div>
+      <button id="simRun" class="primary">Calculer</button>
+      <div id="simOut" class="sim-out"></div>
+    </div>
+  </section>
+
+  <!-- ============================ ACTUS ============================ -->
+  <section id="tab-news" class="tab-panel">
+    <div class="market-tabs" id="newsTabs"></div>
+    <div id="sentiment" class="sentiment"></div>
+    <p id="newsStatus" class="status"></p>
+    <div id="newsList" class="cards"></div>
+  </section>
+
+  <!-- ============================ INFOS ============================ -->
+  <section id="tab-info" class="tab-panel">
+    <div class="info-card">
+      <h2>Principe</h2>
+      <p>Aide à l'investissement <b>locatif</b> sur 3 marchés (Toulouse, Espagne, Marrakech), sur le
+      modèle d'une appli de reco : <b>note d'opportunité</b> par quartier (rendement + tendance +
+      risque), <b>simulateur</b> (cashflow, fiscalité par pays), <b>actus marché</b> avec sentiment,
+      et <b>prix réels DVF</b> pour Toulouse.</p>
+      <h2>Données</h2>
+      <p>⚠️ Les prix/loyers par quartier sont <b>indicatifs</b> (à ajuster, éditables via ✏️) — il
+      n'existe pas d'API officielle gratuite temps réel pour l'Espagne/Marrakech. Pour <b>Toulouse</b>,
+      le bouton <b>« Prix réels DVF »</b> récupère les <b>ventes réelles</b> de la base officielle
+      <i>DVF</i> (data.gouv.fr) et calcule le prix/m² médian par code postal.</p>
+      <p class="muted">Actus : Google News RSS par marché. Rien n'est un conseil en investissement.</p>
+      <h2>Version & mises à jour</h2>
+      <p>Version installée : <b id="appVersion">—</b><span id="updState" class="muted"></span></p>
+      <button id="checkUpdBtn" class="ghost">🔄 Vérifier les mises à jour</button>
+      <p class="muted" style="margin-top:10px">Réinitialiser les données de référence éditées :
+        <button id="resetData" class="ghost small">↺ Restaurer</button></p>
+      <p class="muted">Code source (public) :
+        <a href="https://github.com/laurentsar/immo-locatif" target="_blank" rel="noopener">github.com/laurentsar/immo-locatif</a></p>
+    </div>
+  </section>
+
+  <!-- éditeur de quartier (modale) -->
+  <div id="qModal" class="modal" hidden>
+    <div class="modal-box">
+      <h3 id="qmTitle">Éditer</h3>
+      <label>Prix (€/m²)<input id="qmPrix" type="number" inputmode="numeric" /></label>
+      <label>Loyer (€/m²/mois)<input id="qmLoyer" type="number" inputmode="decimal" /></label>
+      <label>Tendance prix 12 mois (%)<input id="qmTrend" type="number" inputmode="decimal" /></label>
+      <div class="modal-actions">
+        <button id="qmCancel" class="ghost">Annuler</button>
+        <button id="qmSave" class="primary">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- résultats DVF (modale) -->
+  <div id="dvfModal" class="modal" hidden>
+    <div class="modal-box">
+      <h3>🏛️ Prix réels DVF — Toulouse</h3>
+      <p class="muted" id="dvfSub">Ventes d'appartements, prix/m² médian par code postal.</p>
+      <div id="dvfList" class="cp-list"></div>
+      <div class="modal-actions"><button id="dvfClose" class="primary">Fermer</button></div>
+    </div>
+  </div>
+
+  <script>
+    window.UPDATE_REPO = 'laurentsar/immo-locatif';
+    window.APP_VERSION = '1.0';
+  </script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="update-check.js"></script>
+</body>
+</html>
