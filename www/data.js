@@ -30,13 +30,13 @@ window.IMMO_DATA = {
       id: 'espagne', nom: 'Espagne', pays: 'Espagne', drapeau: '🇪🇸', fisc: 'es',
       note: 'Non-résident UE : IRPF 19% sur le loyer net. IBI (taxe foncière) locale. Forte demande touristique côtière.',
       quartiers: [
-        { nom: 'Barcelone',       prix: 4500, loyer: 18.0, trend: 3.0, risk: 2 },
-        { nom: 'Madrid',          prix: 4200, loyer: 17.0, trend: 3.5, risk: 2 },
-        { nom: 'Valence',         prix: 2300, loyer: 12.0, trend: 5.0, risk: 2 },
-        { nom: 'Malaga',          prix: 2900, loyer: 13.5, trend: 6.0, risk: 2 },
-        { nom: 'Alicante',        prix: 2000, loyer: 11.0, trend: 4.0, risk: 2 },
-        { nom: 'Séville',         prix: 2300, loyer: 12.0, trend: 3.5, risk: 2 },
-        { nom: 'Marbella',        prix: 3800, loyer: 15.0, trend: 4.5, risk: 2 },
+        { nom: 'Barcelone',       prix: 4500, loyer: 18.0, trend: 3.0, risk: 2, lat: 41.3874, lon: 2.1686 },
+        { nom: 'Madrid',          prix: 4200, loyer: 17.0, trend: 3.5, risk: 2, lat: 40.4168, lon: -3.7038 },
+        { nom: 'Valence',         prix: 2300, loyer: 12.0, trend: 5.0, risk: 2, lat: 39.4699, lon: -0.3763 },
+        { nom: 'Malaga',          prix: 2900, loyer: 13.5, trend: 6.0, risk: 2, lat: 36.7213, lon: -4.4214 },
+        { nom: 'Alicante',        prix: 2000, loyer: 11.0, trend: 4.0, risk: 2, lat: 38.3452, lon: -0.4810 },
+        { nom: 'Séville',         prix: 2300, loyer: 12.0, trend: 3.5, risk: 2, lat: 37.3891, lon: -5.9845 },
+        { nom: 'Marbella',        prix: 3800, loyer: 15.0, trend: 4.5, risk: 2, lat: 36.5101, lon: -4.8825 },
       ],
     },
     {
@@ -76,6 +76,14 @@ window.IMMO_DATA = {
     toulouse: q => 'https://www.leboncoin.fr/recherche?category=9&text=' + encodeURIComponent(q + ' Toulouse'),
     espagne:  q => 'https://www.google.com/search?q=' + encodeURIComponent('venta piso ' + q + ' site:idealista.com'),
     marrakech:q => 'https://www.google.com/search?q=' + encodeURIComponent('vente appartement ' + q + ' Marrakech site:avito.ma'),
+  },
+
+  // Idealista API (Espagne) : liste d'annonces in-app. Clé gratuite (quota ~100/mois)
+  // à demander sur developers.idealista.com. OAuth2 client_credentials.
+  idealista: {
+    token: 'https://api.idealista.com/oauth/token',
+    search: 'https://api.idealista.com/3.5/es/search',
+    distance: 4000, maxItems: 30,
   },
 
   // DVF (ventes réelles) — CSV officiel géo-DVF par commune. Toulouse = 31555.

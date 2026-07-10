@@ -107,6 +107,20 @@
       le bouton <b>« Prix réels DVF »</b> récupère les <b>ventes réelles</b> de la base officielle
       <i>DVF</i> (data.gouv.fr) et calcule le prix/m² médian par code postal.</p>
       <p class="muted">Actus : Google News RSS par marché. Rien n'est un conseil en investissement.</p>
+      <h2>🏘️ Annonces Idealista (Espagne)</h2>
+      <p class="muted">Affiche de vraies annonces (prix, m², pièces, €/m²) pour les villes espagnoles,
+      via l'API Idealista. Clé <b>gratuite</b> (quota ~100 req/mois) à demander sur
+      <a href="https://developers.idealista.com/access-request" target="_blank" rel="noopener">developers.idealista.com</a>
+      (ils envoient un <b>apikey</b> + un <b>secret</b>).</p>
+      <label class="muted" style="display:block">apikey Idealista
+        <input id="ideaKeyInput" type="text" placeholder="apikey" style="width:100%;margin-top:4px" />
+      </label>
+      <label class="muted" style="display:block;margin-top:8px">secret Idealista
+        <input id="ideaSecretInput" type="text" placeholder="secret" style="width:100%;margin-top:4px" />
+      </label>
+      <div style="margin-top:10px"><button id="ideaSaveBtn" class="ghost">Enregistrer la clé</button>
+        <span id="ideaSaveState" class="muted"></span></div>
+
       <h2>Version & mises à jour</h2>
       <p>Version installée : <b id="appVersion">—</b><span id="updState" class="muted"></span></p>
       <button id="checkUpdBtn" class="ghost">🔄 Vérifier les mises à jour</button>
@@ -131,6 +145,16 @@
     </div>
   </div>
 
+  <!-- annonces Idealista (modale) -->
+  <div id="ideaModal" class="modal" hidden>
+    <div class="modal-box">
+      <h3 id="ideaTitle">Annonces</h3>
+      <p class="muted">Annonces à vendre (source Idealista). Le clic ouvre l'annonce.</p>
+      <div id="ideaList" class="cp-list"></div>
+      <div class="modal-actions"><button id="ideaClose" class="primary">Fermer</button></div>
+    </div>
+  </div>
+
   <!-- résultats DVF (modale) -->
   <div id="dvfModal" class="modal" hidden>
     <div class="modal-box">
@@ -143,7 +167,7 @@
 
   <script>
     window.UPDATE_REPO = 'laurentsar/immo-locatif';
-    window.APP_VERSION = '1.0';
+    window.APP_VERSION = '1.1';
   </script>
   <script src="data.js"></script>
   <script src="app.js"></script>

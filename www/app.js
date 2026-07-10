@@ -117,12 +117,15 @@ function renderMarket() {
         <button class="q-edit" data-edit="${esc(x.nom)}">✏️</button>
       </div>
       <div class="q-actions">
+        ${curMarket === 'espagne' ? `<button class="btn-idea" data-idea="${esc(x.nom)}">🏘️ Annonces Idealista</button>` : ''}
         <a class="btn-listings" href="${esc(D.listings[curMarket](x.nom))}" target="_blank" rel="noopener">🔎 Voir les biens disponibles</a>
       </div>
     </div>`;
   }).join('');
   el('quartierList').querySelectorAll('[data-edit]').forEach(b =>
     b.onclick = () => openEdit(b.dataset.edit));
+  el('quartierList').querySelectorAll('[data-idea]').forEach(b =>
+    b.onclick = () => openIdealista(b.dataset.idea));
 }
 
 // ---------- édition d'un quartier ----------
@@ -280,6 +283,71 @@ async function loadDvf() {
 }
 
 // ======================================================================
+// IDEALISTA (Espagne) — liste d'annonces in-app (clé API gratuite requise)
+// ======================================================================
+function ideaKey() { try { return (localStorage.getItem('ideaKey') || '').trim(); } catch (e) { return ''; } }
+function ideaSecret() { try { return (localStorage.getItem('ideaSecret') || '').trim(); } catch (e) { return ''; } }
+// POST form-urlencoded via CapacitorHttp (natif, contourne CORS) sinon fetch.
+async function httpPostForm(url, headers, params) {
+  const hdr = Object.assign({ 'Content-Type': 'application/x-www-form-urlencoded' }, headers);
+  const H = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp;
+  if (H) {
+    const r = await H.post({ url, headers: hdr, data: params, connectTimeout: 12000, readTimeout: 20000 });
+    if (r.status && r.status >= 400) throw new Error('HTTP ' + r.status);
+    return typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+  }
+  const body = Object.entries(params).map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
+  const r = await fetch(url, { method: 'POST', headers: hdr, body });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return await r.json();
+}
+async function ideaToken() {
+  if (!ideaKey() || !ideaSecret()) throw new Error('no-key');
+  const basic = btoa(ideaKey() + ':' + ideaSecret());
+  const j = await httpPostForm(D.idealista.token, { Authorization: 'Basic ' + basic },
+    { grant_type: 'client_credentials', scope: 'read' });
+  if (!j.access_token) throw new Error('token refusé');
+  return j.access_token;
+}
+async function ideaSearch(lat, lon) {
+  const tok = await ideaToken();
+  const j = await httpPostForm(D.idealista.search, { Authorization: 'Bearer ' + tok }, {
+    operation: 'sale', propertyType: 'homes', center: lat + ',' + lon,
+    distance: D.idealista.distance, maxItems: D.idealista.maxItems, numPage: 1,
+    order: 'price', sort: 'asc', locale: 'es',
+  });
+  return j.elementList || [];
+}
+async function openIdealista(nom) {
+  const m = marche('espagne');
+  const base = m.quartiers.find(qq => qq.nom === nom);
+  if (!base || base.lat == null) return;
+  if (!ideaKey() || !ideaSecret()) { alert('Ajoute ta clé Idealista (apikey + secret) dans ℹ️ Infos.'); return; }
+  el('ideaTitle').textContent = '🏘️ ' + nom;
+  el('ideaList').innerHTML = '<p class="cp-note"><span class="spin">⏳</span> Recherche des annonces Idealista…</p>';
+  el('ideaModal').hidden = false;
+  try {
+    const list = await ideaSearch(base.lat, base.lon);
+    if (!list.length) { el('ideaList').innerHTML = '<p class="cp-note">Aucune annonce trouvée dans ce secteur.</p>'; return; }
+    el('ideaList').innerHTML = list.map(p => {
+      const pm2 = p.priceByArea ? Math.round(p.priceByArea) : (p.size ? Math.round(p.price / p.size) : 0);
+      const addr = p.address || [p.district, p.municipality].filter(Boolean).join(', ') || 'Bien';
+      return `<a class="idea-item" href="${esc(p.url || '#')}" target="_blank" rel="noopener">
+        <div class="idea-l">
+          <div class="idea-price">${fmt(p.price)} €</div>
+          <div class="idea-sub">${esc(addr)}</div>
+          <div class="idea-meta">${p.size ? Math.round(p.size) + ' m²' : ''}${p.rooms ? ' · ' + p.rooms + ' pce' + (p.rooms > 1 ? 's' : '') : ''}${pm2 ? ' · ' + fmt(pm2) + ' €/m²' : ''}</div>
+        </div><span class="idea-go">→</span></a>`;
+    }).join('');
+  } catch (e) {
+    const msg = (e && e.message) || String(e);
+    el('ideaList').innerHTML = '<p class="cp-note">⚠️ ' +
+      (msg === 'no-key' ? 'Clé manquante (ℹ️ Infos).' :
+        'Échec (' + esc(msg) + '). Vérifie ta clé/secret. En navigateur le CORS bloque — ça marche dans l\'APK. Quota ~100 req/mois.') + '</p>';
+  }
+}
+
+// ======================================================================
 // MAJ in-app (plugin natif) + version
 // ======================================================================
 function cmpVer(a, b) {
@@ -341,6 +409,17 @@ function init() {
   el('qModal').addEventListener('click', e => { if (e.target === el('qModal')) el('qModal').hidden = true; });
   el('dvfClose').onclick = () => { el('dvfModal').hidden = true; };
   el('dvfModal').addEventListener('click', e => { if (e.target === el('dvfModal')) el('dvfModal').hidden = true; });
+  el('ideaClose').onclick = () => { el('ideaModal').hidden = true; };
+  el('ideaModal').addEventListener('click', e => { if (e.target === el('ideaModal')) el('ideaModal').hidden = true; });
+  el('ideaKeyInput').value = ideaKey();
+  el('ideaSecretInput').value = ideaSecret();
+  el('ideaSaveBtn').onclick = () => {
+    try {
+      localStorage.setItem('ideaKey', el('ideaKeyInput').value.trim());
+      localStorage.setItem('ideaSecret', el('ideaSecretInput').value.trim());
+    } catch (e) {}
+    el('ideaSaveState').textContent = ' ✅ enregistré';
+  };
   el('appVersion').textContent = 'v' + (window.APP_VERSION || '?');
   el('verChip').textContent = 'v' + (window.APP_VERSION || '?');
   el('checkUpdBtn').onclick = checkUpdate;
