@@ -1,6 +1,6 @@
 {
   "name": "immo-locatif",
-  "version": "1.2",
+  "version": "1.3",
   "private": true,
   "description": "Reco investissement immobilier locatif (Toulouse / Espagne / Marrakech) : score d'opportunité par quartier, simulateur de rendement, actus marché, DVF réel Toulouse (PWA + APK)",
   "scripts": { "sync": "cap sync android", "open": "cap open android" },
