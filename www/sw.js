@@ -1,8 +1,9 @@
 /* Immo Locatif — service worker. Cache l'app shell (offline). Les données live
    (news RSS, DVF, GitHub) ne sont PAS mises en cache : toujours du réseau. */
-const CACHE = 'immo-locatif-v1.1';
+const CACHE = 'immo-locatif-v1.2';
 const SHELL = [
   'index.html', 'styles.css', 'app.js', 'data.js', 'update-check.js',
+  'autobackup.js',
   'manifest.webmanifest', 'img/icon-192.png', 'img/icon-512.png',
 ];
 self.addEventListener('install', e => {

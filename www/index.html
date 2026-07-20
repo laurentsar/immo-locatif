@@ -96,6 +96,12 @@
   <!-- ============================ INFOS ============================ -->
   <section id="tab-info" class="tab-panel">
     <div class="info-card">
+      <h2>Sauvegarde des données</h2>
+      <p class="muted">Tes clés API et tes paramètres vivent sur ce téléphone : désinstaller
+      l'app les efface. Renseigne Home Assistant ci-dessous et la sauvegarde devient
+      automatique — la restauration est proposée au premier lancement après réinstallation.</p>
+      <div id="backup-panel"></div>
+
       <h2>Principe</h2>
       <p>Aide à l'investissement <b>locatif</b> sur 3 marchés (Toulouse, Espagne, Marrakech), sur le
       modèle d'une appli de reco : <b>note d'opportunité</b> par quartier (rendement + tendance +
@@ -167,10 +173,13 @@
 
   <script>
     window.UPDATE_REPO = 'laurentsar/immo-locatif';
-    window.APP_VERSION = '1.1';
+    window.APP_VERSION = '1.2';
   </script>
   <script src="data.js"></script>
   <script src="app.js"></script>
   <script src="update-check.js"></script>
+  <script>window.BACKUP_APP = 'immo-locatif';</script>
+  <script src="autobackup.js"></script>
+  <script>AutoBackup.mount(document.getElementById('backup-panel'));</script>
 </body>
 </html>
