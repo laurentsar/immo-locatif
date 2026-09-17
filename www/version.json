@@ -1,3 +1,4 @@
 {
-  "version": "1.5"
+  "version": "1.5.1",
+  "notes": "Maintenance: Capacitor 8 + chaîne CI corrigée (setup-android v4, Node 22, JDK 21, release gh CLI)."
 }
